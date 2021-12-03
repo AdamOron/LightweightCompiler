@@ -37,17 +37,19 @@ public:
 	void Visit(const WhileExpr *expr);
 	void Visit(const ForExpr *expr);
 	void Visit(const ExprBlock *block);
+	virtual Var *GetVar(const Token *id) const;
 };
 
 class ControllableVisitor : public BaseVisitor
 {
 private:
-	const IVisitor *superVisitor;
+	const BaseVisitor *superVisitor;
 	const std::string labelEnter, labelExit;
 
 public:
 	ControllableVisitor(const BaseVisitor *superVisitor, const std::string labelEnter, const std::string labelExit);
 	void Visit(const ControlFlowExpr *expr);
+	Var *GetVar(const Token *id) const override;
 };
 
 std::string Compile(const ExprBlock *block);

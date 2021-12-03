@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ASMGenerator.cpp" />
+    <ClCompile Include="ASMRunner.cpp" />
     <ClCompile Include="Compiler.cpp" />
     <ClCompile Include="Expr.cpp" />
     <ClCompile Include="Lexer.cpp" />
@@ -149,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ASMGenerator.h" />
+    <ClInclude Include="ASMRunner.h" />
     <ClInclude Include="Compiler.h" />
     <ClInclude Include="Expr.h" />
     <ClInclude Include="Lexer.h" />

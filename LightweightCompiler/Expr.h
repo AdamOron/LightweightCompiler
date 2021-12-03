@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include "Lexer.h"
+#include "VarTable.h"
 
 class IVisitor;
 
@@ -48,6 +49,12 @@ public:
 
 		return stream;
 	}
+};
+
+class ValueExpr : public Expr
+{
+public:
+	virtual Type *GetType() = 0;
 };
 
 /**

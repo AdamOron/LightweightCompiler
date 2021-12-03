@@ -15,6 +15,18 @@ ControllableVisitor::ControllableVisitor(const BaseVisitor *superVisitor, const 
 {
 }
 
+Var *ControllableVisitor::GetVar(const Token *id) const
+{
+	Var *current = varTable->Get(id);
+
+	if (current == NULL)
+	{
+		return superVisitor->GetVar(id);
+	}
+
+	return current;
+}
+
 void ControllableVisitor::Visit(const ControlFlowExpr *expr)
 {
 	switch (expr->stmt->type)
@@ -24,7 +36,7 @@ void ControllableVisitor::Visit(const ControlFlowExpr *expr)
 		break;
 
 	case TokenType::CONTINUE:
-		asmGen->AppendLine("JMP " + labelEnter + " // continue");
+		asmGen->AppendLine("JMP " + labelEnter + " ; continue");
 		break;
 	}
 }
@@ -33,6 +45,11 @@ BaseVisitor::BaseVisitor()
 {
 	this->asmGen = ASMGenerator::GetInstance();
 	this->varTable = new VarTable();
+}
+
+Var *BaseVisitor::GetVar(const Token *id) const
+{
+	return varTable->Get(id);
 }
 
 void BaseVisitor::Visit(const LitExpr *expr)
@@ -55,11 +72,11 @@ void BaseVisitor::Visit(const LitExpr *expr)
 void BaseVisitor::Visit(const AccessibleExpr *expr)
 {
 	Token *id = expr->id;
-	Var *var = varTable->Get(id);
+	Var *var = GetVar(id);
 
 	if (var == NULL)
 	{
-		ThrowError("Invalid accessor name");
+		ThrowError("Invalid accessor name " + id->literal);
 	}
 
 	asmGen->PushValue("[ebp-" + std::to_string(var->memOffset) + "]");
@@ -291,23 +308,21 @@ void BaseVisitor::Visit(const PrintExpr *expr)
 
 void BaseVisitor::Visit(const AssignExpr *expr)
 {
+	/* Extract variable ID from AssignExpr */
 	Token *id = expr->var->id;
-	Var *var = varTable->Get(id);
+	/* Get variable that matches extracted ID. If this is null, we need to initialize a new variable */
+	Var *var = GetVar(id);
 
+ 	/* Check if we need to initialize a new variable */
 	bool toAdd = var == NULL;
 
-	if (toAdd)
-	{
-		var = new Var(id, 4, 4 + varTable->GetNextOffset());
-		asmGen->AppendLine("SUB esp, " + std::to_string(var->typeSize)); // Allocate memory for variable
-	}
-
-	asmGen->AppendSpace();
 	expr->value->Accept(this);
+	asmGen->AppendSpace();
 
 	if (toAdd)
 	{
-		varTable->Add(var);
+		var = varTable->Add(expr->var->id);
+		asmGen->AppendLine("SUB esp, " + std::to_string(var->type->size)); // Allocate memory for variable
 	}
 
 	std::string memAddress = "[ebp-" + std::to_string(var->memOffset) + "]";
@@ -356,7 +371,7 @@ void BaseVisitor::VisitCondition(const IfExpr *expr, std::string &exitLabel)
 	asmGen->AppendLine("CMP eax, 0");
 	asmGen->AppendLine("JZ " + falseLabel + " ;; If conditin is false, jump to false label");
 	asmGen->AppendSpace();
-	Visit(expr->cond);
+	Visit(expr->block);
 	asmGen->AppendLine("JMP " + exitLabel);
 	asmGen->AppendLine(falseLabel + ":");
 	if (expr->elif != NULL) VisitCondition(expr->elif, exitLabel);
@@ -443,13 +458,13 @@ std::string Compile(const ExprBlock *block)
 {
 	BaseVisitor visitor;
 
-	//visitor.asmGen->FilePrologue();
+	visitor.asmGen->FilePrologue();
 	//visitor.asmGen->EnterMethod();
 
 	visitor.Visit(block);
 
 	//visitor.asmGen->ExitMethod();
-	//visitor.asmGen->FileEpilogue();
+	visitor.asmGen->FileEpilogue();
 
 	return visitor.asmGen->code;
 }

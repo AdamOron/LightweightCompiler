@@ -1,6 +1,6 @@
 #include "ASMGenerator.h"
 
-const std::string ASMGenerator::LABEL_PREFIX = ".L";
+const std::string ASMGenerator::LABEL_PREFIX = "L";
 
 std::string ASMGenerator::CreateLabel(const size_t labelIndex)
 {

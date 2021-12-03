@@ -4,12 +4,10 @@
 
 struct Type
 {
-	const Token type;
-	const size_t typeSize;
+	const size_t size;
 
-	Type(const Token type, const size_t typeSize) :
-		type(type),
-		typeSize(typeSize)
+	Type(const size_t typeSize) :
+		size(typeSize)
 	{
 	}
 };
@@ -17,41 +15,41 @@ struct Type
 class TypeTable
 {
 private:
-	static const size_t SIZE_INT = 16;
-	static const size_t SIZE_FLOAT = 16;
-	static const size_t SIZE_BOOL = 1;
-	static const size_t SIZE_CHAR = 1;
-
 	std::unordered_map<std::string, Type *> typeTable;
 
 public:
+	static const Type *TYPE_INT;
+	static const Type *TYPE_FLOAT;
+	static const Type *TYPE_BOOL;
+	static const Type *TYPE_CHAR;
+
 	TypeTable();
-	Type *GetType(Token *typeId);
+	const Type *GetType(const Token *value);
 };
 
 struct Var
 {
-	Token *id;
-	int typeSize;
-	int memOffset;
+	const Token *id;
+	const Type *type;
+	size_t memOffset;
 
-	Var(Token *id, int typeSize, int memOffset)
+	Var(const Token *id, const Type *type, size_t memOffset) :
+		id(id),
+		type(type),
+		memOffset(memOffset)
 	{
-		this->id = id;
-		this->typeSize = typeSize;
-		this->memOffset = memOffset;
 	}
 };
 
 class VarTable
 {
 private:
+	TypeTable types;
 	std::unordered_map<std::string, Var *> varMap;
-	int totalBytes;
+	size_t totalBytes;
 
 public:
 	VarTable();
-	int GetNextOffset();
-	void Add(Var *var);
-	Var *Get(Token *id);
+	Var *Add(const Token *id);
+	Var *Get(const Token *id);
 };

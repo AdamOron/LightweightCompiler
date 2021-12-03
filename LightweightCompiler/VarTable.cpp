@@ -1,48 +1,53 @@
 #include "VarTable.h"
 
+const Type *TypeTable::TYPE_INT		= new Type(4);
+const Type *TypeTable::TYPE_FLOAT	= new Type(4);
+const Type *TypeTable::TYPE_BOOL	= new Type(1);
+const Type *TypeTable::TYPE_CHAR	= new Type(1);
+
 TypeTable::TypeTable()
 {
 	this->typeTable = std::unordered_map<std::string, Type *>();
 }
 
-Type *TypeTable::GetType(Token *typeId)
+const Type *TypeTable::GetType(const Token *value)
 {
-	/*switch (typeId->type)
+	switch (value->type)
 	{
 	case TokenType::INT:
-		return SIZE_INT;
+		return TYPE_INT;
 
 	case TokenType::FLOAT:
-		return SIZE_FLOAT;
+		return TYPE_FLOAT;
 
 	case TokenType::BOOL:
-		return SIZE_BOOL;
+		return TYPE_BOOL;
 
 	case TokenType::CHAR:
-		return SIZE_CHAR;
-	}*/
+		return TYPE_CHAR;
+	}
 
 	return NULL;
 }
 
 VarTable::VarTable()
 {
+	this->types = TypeTable();
 	this->varMap = std::unordered_map<std::string, Var*>();
 	this->totalBytes = 0;
 }
 
-int VarTable::GetNextOffset()
+Var *VarTable::Add(const Token* id)
 {
-	return totalBytes;
-}
+	Var *var = new Var(id, TypeTable::TYPE_INT, totalBytes + TypeTable::TYPE_INT->size);
 
-void VarTable::Add(Var *var)
-{
 	varMap[var->id->literal] = var;
-	totalBytes += var->typeSize;
+	totalBytes += var->type->size;
+
+	return var;
 }
 
-Var *VarTable::Get(Token *id)
+Var *VarTable::Get(const Token *id)
 {
 	auto iterator = varMap.find(id->literal);
 	return iterator == varMap.end() ? NULL : iterator->second;
