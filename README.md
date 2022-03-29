@@ -35,10 +35,10 @@ if var == 5
 ```
 Here are some other examples of the syntax:
 ```
-a = 5
+int a = 5
 
 for i = 0, i < 5, i += 1
-  b = 20
+  int b = 20
 	
   while b >= 1
     a += b
@@ -47,9 +47,9 @@ for i = 0, i < 5, i += 1
   print(a)
 ```
 ```
-a = true
-b = true
-c = 30
+bool a = true
+bool b = true
+int c = 30
 
 while c > 0
   if a && b
