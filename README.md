@@ -3,7 +3,7 @@
 The compiler is in a fairly rough state at the moment - some classes are redundant/require intense refactoring, some interfaces are oddly constructed, the hierarchy might be confusing and seem unnatural.  
 There are also countless problems with the ways I used pointers (overuse of unnecessary heap allocations, virtually no deallocations).  
 **Please do keep in mind that I started this project a long time ago in an attempt to learn C++, and be merciful when reviewing it :)**
-**Now that I am finished with the pathetic excuses, I will briefly explain how to use this compiler**  
+**I have now finished making pathetic excuses for myself**  
 
 # Instructions
 You will need NASM installed on your machine & added to your system's PATH (ended up switching to NASM, MASM was a tad problematic).  
