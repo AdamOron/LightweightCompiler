@@ -5,9 +5,9 @@ const Type *TypeTable::TYPE_FLOAT	= new Type(4);
 const Type *TypeTable::TYPE_BOOL	= new Type(1);
 const Type *TypeTable::TYPE_CHAR	= new Type(1);
 
-TypeTable::TypeTable()
+TypeTable::TypeTable() : 
+	typeTable(std::unordered_map<VarId, const Type *>())
 {
-	this->typeTable = std::unordered_map<std::string, Type *>();
 }
 
 const Type *TypeTable::GetType(const Token *value)
@@ -30,19 +30,20 @@ const Type *TypeTable::GetType(const Token *value)
 	return NULL;
 }
 
+size_t VarTable::totalBytes = 0;
+
 VarTable::VarTable()
 {
 	this->types = TypeTable();
 	this->varMap = std::unordered_map<std::string, Var*>();
-	this->totalBytes = 0;
 }
 
-Var *VarTable::Add(const Token* id)
+Var *VarTable::Add(const Token *id, const Type *type)
 {
-	Var *var = new Var(id, TypeTable::TYPE_INT, totalBytes + TypeTable::TYPE_INT->size);
+	Var *var = new Var(id, type, totalBytes + type->size);
 
+	totalBytes += type->size;
 	varMap[var->id->literal] = var;
-	totalBytes += var->type->size;
 
 	return var;
 }

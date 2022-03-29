@@ -139,23 +139,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ASMGenerator.cpp" />
-    <ClCompile Include="ASMRunner.cpp" />
-    <ClCompile Include="Compiler.cpp" />
-    <ClCompile Include="Expr.cpp" />
-    <ClCompile Include="Lexer.cpp" />
-    <ClCompile Include="LightweightCompiler.cpp" />
-    <ClCompile Include="Parser.cpp" />
-    <ClCompile Include="VarTable.cpp" />
+    <ClCompile Include="src\asm\ASMGenerator.cpp" />
+    <ClCompile Include="src\asm\ASMRunner.cpp" />
+    <ClCompile Include="src\visitors\StatementVisitor.cpp" />
+    <ClCompile Include="src\compiler\Compiler.cpp" />
+    <ClCompile Include="src\visitors\ControllableVisitor.cpp" />
+    <ClCompile Include="src\visitors\ValueVisitor.cpp" />
+    <ClCompile Include="src\parser\Expr.cpp" />
+    <ClCompile Include="src\tokens\Tokenizer.cpp" />
+    <ClCompile Include="src\LightweightCompiler.cpp" />
+    <ClCompile Include="src\parser\Parser.cpp" />
+    <ClCompile Include="src\variables\VarTable.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ASMGenerator.h" />
-    <ClInclude Include="ASMRunner.h" />
-    <ClInclude Include="Compiler.h" />
-    <ClInclude Include="Expr.h" />
-    <ClInclude Include="Lexer.h" />
-    <ClInclude Include="Parser.h" />
-    <ClInclude Include="VarTable.h" />
+    <ClInclude Include="src\asm\ASMGenerator.h" />
+    <ClInclude Include="src\asm\ASMRunner.h" />
+    <ClInclude Include="src\visitors\StatementVisitor.h" />
+    <ClInclude Include="src\compiler\Compiler.h" />
+    <ClInclude Include="src\visitors\ControllableVisitor.h" />
+    <ClInclude Include="src\visitors\IVisitor.h" />
+    <ClInclude Include="src\visitors\ValueVisitor.h" />
+    <ClInclude Include="src\parser\Expr.h" />
+    <ClInclude Include="src\tokens\Tokenizer.h" />
+    <ClInclude Include="src\parser\Parser.h" />
+    <ClInclude Include="src\tokens\Token.h" />
+    <ClInclude Include="src\variables\VarTable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

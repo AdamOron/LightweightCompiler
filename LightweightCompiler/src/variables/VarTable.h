@@ -1,5 +1,5 @@
 #pragma once
-#include "Lexer.h"
+#include "../tokens/Token.h"
 #include <unordered_map>
 
 struct Type
@@ -12,12 +12,16 @@ struct Type
 	}
 };
 
+using VarId = std::string;
+
 class TypeTable
 {
 private:
-	std::unordered_map<std::string, Type *> typeTable;
+	/* Map variable's IDs to their types */
+	std::unordered_map<VarId, const Type *> typeTable;
 
 public:
+	/* I am currently just saving these 4 types as a temporary solution. This is obviously not elegant and doesn't really help with anything. */
 	static const Type *TYPE_INT;
 	static const Type *TYPE_FLOAT;
 	static const Type *TYPE_BOOL;
@@ -31,7 +35,7 @@ struct Var
 {
 	const Token *id;
 	const Type *type;
-	size_t memOffset;
+	const size_t memOffset;
 
 	Var(const Token *id, const Type *type, size_t memOffset) :
 		id(id),
@@ -44,12 +48,12 @@ struct Var
 class VarTable
 {
 private:
+	static size_t totalBytes;
 	TypeTable types;
-	std::unordered_map<std::string, Var *> varMap;
-	size_t totalBytes;
+	std::unordered_map<VarId, Var *> varMap;
 
 public:
 	VarTable();
-	Var *Add(const Token *id);
+	Var *Add(const Token *id, const Type *type);
 	Var *Get(const Token *id);
 };

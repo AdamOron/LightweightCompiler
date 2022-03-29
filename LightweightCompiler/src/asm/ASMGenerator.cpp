@@ -166,7 +166,6 @@ void ASMGenerator::EnterMethod()
 	AppendComment("Method Prologue");
 	AppendLine("PUSH ebp");
 	AppendLine("MOV ebp, esp");
-	AppendSpace();
 }
 
 void ASMGenerator::ExitMethod()
@@ -174,21 +173,46 @@ void ASMGenerator::ExitMethod()
 	AppendComment("Method Epilogue");
 	AppendLine("MOV esp, ebp");
 	AppendLine("POP ebp");
-	//AppendLine("RET");
+	AppendLine("RET");
+}
+
+void ASMGenerator::DefineLib()
+{
+	AppendComment("Library Start");
 	AppendSpace();
+
+	AppendLine("decimal_format: db \"%d\", 10, 0");
+	AppendLine("extern _printf");
+	AppendSpace();
+	AppendLine("print_number:");
+	AppendLine("MOV eax, [esp+4]");
+	AppendLine("PUSH eax");
+	AppendLine("PUSH decimal_format");
+	AppendLine("CALL _printf");
+	AppendLine("ADD esp, 8");
+	AppendLine("RET");
+	AppendSpace();
+
+	AppendComment("Library End");
 }
 
 void ASMGenerator::FilePrologue()
 {
-	AppendLine("include \\masm32\\include\\masm32rt.inc");
+	/*AppendLine("include \\masm32\\include\\masm32rt.inc");
 	AppendSpace();
 	AppendLine(".code");
 	AppendLine("start:");
+	AppendSpace();*/
+
+	AppendLine("section .text");
 	AppendSpace();
+	DefineLib();
+	AppendSpace();
+	AppendLine("global _main");
+	AppendSpace();
+	AppendLine("_main:");
 }
 
 void ASMGenerator::FileEpilogue()
 {
-	AppendSpace();
-	AppendLine("end start");
 }

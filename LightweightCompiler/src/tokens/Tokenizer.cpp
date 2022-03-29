@@ -1,11 +1,13 @@
-#include "Lexer.h"
+#include "Tokenizer.h"
 #include <sstream>
 #include <stdarg.h>
 
-const std::string Token::FALSE_LIT = "false";
-const std::string Token::TRUE_LIT = "true";
+/* Save String literals for True/False */
+const std::string Token::FALSE_LITERAL = "false";
+const std::string Token::TRUE_LITERAL = "true";
 
-const std::unordered_map<std::string, TokenType> Lexer::KEYWORDS =
+/* Map every keyword to its matching TokenType */
+const std::unordered_map<std::string, TokenType> Tokenizer::KEYWORDS =
 {
 	{"if", TokenType::IF},
 	{"else", TokenType::ELSE},
@@ -16,32 +18,41 @@ const std::unordered_map<std::string, TokenType> Lexer::KEYWORDS =
 	{"continue", TokenType::CONTINUE},
 	{"print", TokenType::PRINT},
 	{"return", TokenType::RETURN},
-	{Token::FALSE_LIT, TokenType::BOOL},
-	{Token::TRUE_LIT, TokenType::BOOL},
+	{Token::FALSE_LITERAL, TokenType::BOOL},
+	{Token::TRUE_LITERAL, TokenType::BOOL},
+
+	{"void", TokenType::TYPE_VOID},
+	{"int", TokenType::TYPE_INT},
+	{"float", TokenType::TYPE_FLOAT},
+	{"bool", TokenType::TYPE_BOOL},
+	{"char", TokenType::TYPE_CHAR},
 };
 
-/**
-* @param type the Token's type.
-* @return Token with current char streak (from tokenStart to index) and given type.
-*/
-Token Lexer::CreateToken(TokenType type)
+Tokenizer::Tokenizer(const std::string &source) :
+	source(source),
+	index(0),
+	tokenStart(0)
+{
+}
+
+Token Tokenizer::CreateToken(TokenType type)
 {
 	std::string literal = "";
 
 	for (size_t i = tokenStart; i <= index; i++)
 	{
-		literal += source->at(i);
+		literal += source.at(i);
 	}
 
 	return Token{ type, literal };
 }
 
-void Lexer::StartToken()
+void Tokenizer::StartToken()
 {
 	tokenStart = index;
 }
 
-void Lexer::Expect(int charCount, ...)
+void Tokenizer::Expect(int charCount, ...)
 {
 	if (!HasCurrent())
 	{
@@ -68,46 +79,27 @@ void Lexer::Expect(int charCount, ...)
 	exit(1);
 }
 
-/**
-* @return current char from source.
-*/
-char Lexer::Current()
+char Tokenizer::Current()
 {
-	return source->at(index);
+	return source.at(index);
 }
 
-/**
-* Advance to next char by increasing index.
-*/
-void Lexer::Next()
+void Tokenizer::Next()
 {
 	index++;
 }
 
-/**
-* Return to previous char by decreasing index.
-*/
-void Lexer::Prev()
+void Tokenizer::Prev()
 {
 	index--;
 }
 
-/**
-* @return whether current char is out of range or not.
-*/
-bool Lexer::HasCurrent()
+bool Tokenizer::HasCurrent()
 {
-	return index < source->length();
+	return index < source.length();
 }
 
-/**
-* @param ch is the desired char.
-* @return whether next char is given char.
-*
-* Checks whether next char is given char.
-* If there's a match, it advances to the next char.
-*/
-bool Lexer::MatchNext(char ch)
+bool Tokenizer::MatchNext(char ch)
 {
 	Next();
 
@@ -120,15 +112,12 @@ bool Lexer::MatchNext(char ch)
 	return false;
 }
 
-bool Lexer::IsIndent()
+bool Tokenizer::IsIndent()
 {
 	return Current() == '\n' || Current() == '\t';
 }
 
-/**
-* Skips next whitespace chars.
-*/
-void Lexer::SkipWhitespace()
+void Tokenizer::SkipWhitespace()
 {
 	/* As long as the current char is valid */
 	while (HasCurrent())
@@ -144,12 +133,7 @@ void Lexer::SkipWhitespace()
 	}
 }
 
-/**
-* @return numeric Token.
-*
-* This function should be called only when encountering a digit.
-*/
-Token Lexer::ScanLiteral()
+Token Tokenizer::ScanLiteral()
 {
 	/* Represents whether the number is decimal or not */
 	bool isDecimal = false;
@@ -184,7 +168,7 @@ Token Lexer::ScanLiteral()
 	return CreateToken(isDecimal ? TokenType::FLOAT : TokenType::INT);
 }
 
-Token Lexer::ScanKeyword()
+Token Tokenizer::ScanKeyword()
 {
 	std::string keywordLiteral = "";
 	keywordLiteral += Current();
@@ -211,7 +195,7 @@ Token Lexer::ScanKeyword()
 	return CreateToken(iterator == KEYWORDS.end() ? TokenType::ID : iterator->second);
 }
 
-Token Lexer::ScanChar()
+Token Tokenizer::ScanChar()
 {
 	Next(); // Skip apostrophe (')
 
@@ -226,10 +210,7 @@ Token Lexer::ScanChar()
 	return charToken;
 }
 
-/**
-* @return basic Token.
-*/
-Token Lexer::ScanOperator()
+Token Tokenizer::ScanOperator()
 {
 	switch (Current())
 	{
@@ -289,6 +270,8 @@ Token Lexer::ScanOperator()
 		return CreateToken(TokenType::QMARK);
 	case ':':
 		return CreateToken(TokenType::COLON);
+	case ',':
+		return CreateToken(TokenType::COMMA);
 
 	case '\'':
 		return ScanChar();
@@ -298,7 +281,7 @@ Token Lexer::ScanOperator()
 	return ScanKeyword();
 }
 
-Token Lexer::ScanIndent()
+Token Tokenizer::ScanIndent()
 {
 	char indent = Current();
 
@@ -314,13 +297,7 @@ Token Lexer::ScanIndent()
 	return CreateToken(TokenType::INVALID);
 }
 
-/**
-* @return current Token.
-*
-* Scans & returns Token starting at current index.
-* When the function exits, the cur char is the last char in the scanned Token.
-*/
-Token Lexer::ScanToken()
+Token Tokenizer::ScanToken()
 {
 	/* Save current Token starting index */
 	StartToken();
@@ -341,11 +318,7 @@ Token Lexer::ScanToken()
 	return ScanOperator();
 }
 
-/**
-* @param src is the source to be tokenized.
-* @return list of Tokens in the source.
-*/
-std::vector<Token> Lexer::ScanTokens()
+std::vector<Token> Tokenizer::ScanTokens()
 {
 	std::vector<Token> tokens = std::vector<Token>();
 

@@ -1,9 +1,8 @@
 #pragma once
+#include "../tokens/Token.h"
+#include "../visitors/IVisitor.h"
+#include "../variables/VarTable.h"
 #include <algorithm>
-#include "Lexer.h"
-#include "VarTable.h"
-
-class IVisitor;
 
 /**
 * Abstract class that represents a generic expression.
@@ -22,39 +21,33 @@ inline std::ostream &operator<<(std::ostream &ostrm, const Expr &expr)
 	return expr.Repr(ostrm);
 }
 
-class ExprBlock : public Expr
+class ExprGroup : public Expr
 {
 public:
-	std::vector<const Expr *> *exprs;
+	std::vector<const Expr *> exprs;
 
-	ExprBlock()
+	ExprGroup()
 	{
-		this->exprs = new std::vector<const Expr *>();
+		this->exprs = std::vector<const Expr *>();
 	}
 
 	void Add(const Expr *expr)
 	{
-		this->exprs->push_back(expr);
+		this->exprs.push_back(expr);
 	}
 
 	void Accept(IVisitor *visitor) const override;
 
 	std::ostream &Repr(std::ostream &stream) const override
 	{
-		for (auto iter = exprs->begin(); iter != exprs->end(); iter++)
+		for (auto expr : exprs)
 		{
-			(*iter)->Repr(stream);
+			expr->Repr(stream);
 			stream << '\n';
 		}
 
 		return stream;
 	}
-};
-
-class ValueExpr : public Expr
-{
-public:
-	virtual Type *GetType() = 0;
 };
 
 /**
@@ -206,15 +199,30 @@ class AccessibleExpr : public Expr
 {
 public:
 	Token *id;
+	Expr *index;
+
+	AccessibleExpr(Token *id, Expr *index) :
+		id(id),
+		index(index)
+	{
+	}
 
 	AccessibleExpr(Token *id) :
-		id(id)
+		AccessibleExpr(id, NULL)
 	{
 	}
 
 	std::ostream &Repr(std::ostream &stream) const override
 	{
 		stream << *id;
+
+		if (index != NULL)
+		{
+			stream << "[";
+			index->Repr(stream);
+			stream << "]";
+		}
+
 		return stream;
 	}
 
@@ -227,7 +235,33 @@ public:
 class ArrayExpr : public Expr
 {
 public:
+	std::vector<const Expr *> *values;
 
+	ArrayExpr()
+	{
+		this->values = new std::vector<const Expr *>();
+	}
+
+	void Add(const Expr *expr)
+	{
+		this->values->push_back(expr);
+	}
+
+	std::ostream &Repr(std::ostream &stream) const override
+	{
+		stream << "[";
+
+		for (size_t i = 0; i < values->size(); i++)
+		{
+			values->at(i)->Repr(stream);
+			if (i < values->size() - 1) stream << ", ";
+		}
+
+		stream << "]";
+		return stream;
+	}
+
+	void Accept(IVisitor *visitor) const override;
 };
 
 /**
@@ -289,17 +323,17 @@ class IfExpr : public Expr
 {
 public:
 	CondExpr *cond;
-	ExprBlock *block;
+	ExprGroup *block;
 	IfExpr *elif; // Chain elif expressions
 
-	IfExpr(CondExpr *cond, ExprBlock *block, IfExpr *elif) :
+	IfExpr(CondExpr *cond, ExprGroup *block, IfExpr *elif) :
 		cond(cond),
 		block(block),
 		elif(elif)
 	{
 	}
 
-	IfExpr(CondExpr *cond, ExprBlock *block) :
+	IfExpr(CondExpr *cond, ExprGroup *block) :
 		IfExpr(cond, block, NULL)
 	{
 	}
@@ -328,9 +362,9 @@ class ElseExpr : public Expr
 {
 public:
 	IfExpr *ifExpr;
-	ExprBlock *block;
+	ExprGroup *block;
 
-	ElseExpr(IfExpr *ifExpr, ExprBlock *block) :
+	ElseExpr(IfExpr *ifExpr, ExprGroup *block) :
 		ifExpr(ifExpr),
 		block(block)
 	{
@@ -371,9 +405,9 @@ class WhileExpr : public Expr
 {
 public:
 	CondExpr *cond;
-	ExprBlock *block;
+	ExprGroup *block;
 
-	WhileExpr(CondExpr *cond, ExprBlock *block) :
+	WhileExpr(CondExpr *cond, ExprGroup *block) :
 		cond(cond),
 		block(block)
 	{
@@ -397,9 +431,9 @@ class ForExpr : public Expr
 public:
 	Expr *assign, *incr;
 	CondExpr *cond;
-	ExprBlock *block;
+	ExprGroup *block;
 
-	ForExpr(Expr *assign, CondExpr *cond, Expr *incr, ExprBlock *block) :
+	ForExpr(Expr *assign, CondExpr *cond, Expr *incr, ExprGroup *block) :
 		assign(assign),
 		cond(cond),
 		incr(incr),
@@ -424,24 +458,30 @@ public:
 	}
 };
 
-class IVisitor
+class FuncExpr : public Expr
 {
 public:
-	virtual ~IVisitor() {}
-	virtual void Visit(const ExprBlock *expr) = 0;
-	virtual void Visit(const LitExpr *expr) = 0;
-	virtual void Visit(const UnaryExpr *expr) = 0;
-	virtual void Visit(const BinaryExpr *expr) = 0;
-	virtual void Visit(const GroupExpr *expr) = 0;
-	virtual void Visit(const TernExpr *expr) = 0;
-	virtual void Visit(const CondExpr *expr) = 0;
-	virtual void Visit(const AccessibleExpr *expr) = 0;
-	virtual void Visit(const ArrayExpr *expr) = 0;
-	virtual void Visit(const PrintExpr *expr) = 0;
-	virtual void Visit(const AssignExpr *expr) = 0;
-	virtual void Visit(const IfExpr *expr) = 0;
-	virtual void Visit(const ElseExpr *expr) = 0;
-	virtual void Visit(const ControlFlowExpr *expr) = 0;
-	virtual void Visit(const WhileExpr *expr) = 0;
-	virtual void Visit(const ForExpr *expr) = 0;
+	Token *type;
+	Token *id;
+	Expr *body;
+
+	FuncExpr(Token *type, Token *id, Expr *body) :
+		type(type),
+		id(id),
+		body(body)
+	{
+	}
+
+	void Accept(IVisitor *visitor) const override;
+
+	std::ostream &Repr(std::ostream &stream) const override
+	{
+		stream << *type;
+		stream << " func ";
+		stream << *id;
+		stream << ":\n{\n";
+		body->Repr(stream);
+		stream << "\n}";
+		return stream;
+	}
 };

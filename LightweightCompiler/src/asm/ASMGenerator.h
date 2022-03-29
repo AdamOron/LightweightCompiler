@@ -65,6 +65,7 @@ public:
 	void EnterMethod();
 	void ExitMethod();
 
+	void DefineLib();
 	void FilePrologue();
 	void FileEpilogue();
 };

@@ -35,10 +35,10 @@ void AccessibleExpr::Accept(IVisitor *visitor) const
 	return visitor->Visit(this);
 }
 
-//void ArrayExpr::Accept(IVisitor *visitor) const
-//{
-//	return visitor->Visit(this);
-//}
+void ArrayExpr::Accept(IVisitor *visitor) const
+{
+	return visitor->Visit(this);
+}
 
 void PrintExpr::Accept(IVisitor *visitor) const
 {
@@ -75,7 +75,12 @@ void ForExpr::Accept(IVisitor *visitor) const
 	return visitor->Visit(this);
 }
 
-void ExprBlock::Accept(IVisitor *visitor) const
+void ExprGroup::Accept(IVisitor *visitor) const
+{
+	return visitor->Visit(this);
+}
+
+void FuncExpr::Accept(IVisitor *visitor) const
 {
 	return visitor->Visit(this);
 }
