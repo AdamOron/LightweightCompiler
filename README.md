@@ -8,7 +8,7 @@ There are also countless problems with the ways I used pointers (overuse of unne
 # Instructions
 You will need NASM installed on your machine & added to your system's PATH (ended up switching to NASM, MASM was a tad problematic).  
 
-Source files must be written to a TXT file.  
+Source code must be written to a TXT file.  
 
 After cloning the project, head into src/LightweightCompiler.cpp and update `sourceDir`, `outputDir` and `projectName`.  
 `sourceDir` is the directory in which your project is written.  
