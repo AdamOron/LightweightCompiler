@@ -174,7 +174,7 @@ void StatementVisitor::VisitCondition(const IfExpr *expr, std::string &exitLabel
 	asmGen->AppendLine("JZ " + falseLabel + " ;; If conditin is false, jump to false label");
 	asmGen->AppendSpace();
 
-	StatementVisitor *ifVisitor = new StatementVisitor();
+	StatementVisitor *ifVisitor = new StatementVisitor(this);
 	expr->block->Accept(ifVisitor);
 
 	asmGen->AppendLine("JMP " + exitLabel);

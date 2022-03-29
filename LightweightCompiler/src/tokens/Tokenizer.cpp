@@ -319,7 +319,7 @@ Token Tokenizer::ScanToken()
 }
 
 std::vector<Token> Tokenizer::ScanTokens()
-{
+{	
 	std::vector<Token> tokens = std::vector<Token>();
 
 	/* As long as there's a valid char to scan */
