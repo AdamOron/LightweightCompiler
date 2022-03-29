@@ -58,8 +58,8 @@ void CompileAndExecute(const std::string &sourceDir, const std::string &outputDi
 
 int main()
 {
-    std::string sourceDir = "E:\\Workspace\\CompilerProjects\\Example\\";
-    std::string outputDir = "E:\\Workspace\\CompilerProjects\\Example\\out\\";
+    std::string sourceDir = "E:\\Workspace\\VisualStudio\\C++\\LightweightCompilerRefactor\\TestProject\\";
+    std::string outputDir = "E:\\Workspace\\VisualStudio\\C++\\LightweightCompilerRefactor\\TestProject\\out\\";
     std::string projectName = "example";
     
     CompileAndExecute(sourceDir, outputDir, projectName);

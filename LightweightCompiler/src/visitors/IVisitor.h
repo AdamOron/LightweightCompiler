@@ -10,6 +10,7 @@ class CondExpr;
 class AccessibleExpr;
 class ArrayExpr;
 class PrintExpr;
+class InitExpr;
 class AssignExpr;
 class IfExpr;
 class ElseExpr;
@@ -35,6 +36,7 @@ public:
 	virtual void Visit(const ArrayExpr *expr) = 0;
 	virtual void Visit(const PrintExpr *expr) = 0;
 	virtual void Visit(const AssignExpr *expr) = 0;
+	virtual void Visit(const InitExpr *expr) = 0;
 	virtual void Visit(const IfExpr *expr) = 0;
 	virtual void Visit(const ElseExpr *expr) = 0;
 	virtual void Visit(const ControlFlowExpr *expr) = 0;

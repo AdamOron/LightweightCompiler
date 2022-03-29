@@ -199,7 +199,7 @@ class AccessibleExpr : public Expr
 {
 public:
 	Token *id;
-	Expr *index;
+	Expr *index; // If accessible is array, save the accessed cell index
 
 	AccessibleExpr(Token *id, Expr *index) :
 		id(id),
@@ -281,6 +281,35 @@ public:
 	std::ostream &Repr(std::ostream &stream) const override
 	{
 		stream << "print (";
+		value->Repr(stream);
+		stream << ')';
+		return stream;
+	}
+
+	void Accept(IVisitor *visitor) const override;
+};
+
+class InitExpr : public Expr
+{
+public:
+	Token *type;
+	Token *id;
+	Expr *value;
+
+	InitExpr(Token *type, Token *id, Expr *value) :
+		type(type),
+		id(id),
+		value(value)
+	{
+	}
+
+	std::ostream &Repr(std::ostream &stream) const override
+	{
+		stream << '(';
+		stream << *type;
+		stream << " ";
+		stream << *id;
+		stream << " = ";
 		value->Repr(stream);
 		stream << ')';
 		return stream;

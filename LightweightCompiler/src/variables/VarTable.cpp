@@ -40,6 +40,8 @@ VarTable::VarTable()
 
 Var *VarTable::Add(const Token *id, const Type *type)
 {
+	if (varMap[id->literal] != NULL) return NULL;
+
 	Var *var = new Var(id, type, totalBytes + type->size);
 
 	totalBytes += type->size;

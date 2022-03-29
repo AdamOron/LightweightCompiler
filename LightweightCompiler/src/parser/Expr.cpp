@@ -45,6 +45,11 @@ void PrintExpr::Accept(IVisitor *visitor) const
 	return visitor->Visit(this);
 }
 
+void InitExpr::Accept(IVisitor *visitor) const
+{
+	return visitor->Visit(this);
+}
+
 void AssignExpr::Accept(IVisitor *visitor) const
 {
 	return visitor->Visit(this);

@@ -88,42 +88,14 @@ void StatementVisitor::Visit(const AssignExpr *expr)
 	/* Get variable that matches extracted ID. If this is null, we need to initialize a new variable */
 	Var *var = GetVar(id);
 
-	/* Check if we need to initialize a new variable */
-	bool toAdd = var == NULL;
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO: BUG HERE. WE MUST PUSH VALUE ONLY AFTER MOVING ESP.
-	// HOW CAN WE KNOW THE TYPE BEFORE EVALUATING IT?
-	// 1 OPTION IS TO USE TYPES, BUT THAT'S TOO MUCH WORK AND NOT THE POINT OF OUR LANG
-	// 2 OPTION IS TO POP EVALUATED INTO REGISTER, THEN MOV ESP, THEN PUSH AGAIN
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (var == NULL)
+	{
+		ThrowCompileError(id->literal + " is undefined.");
+	}
 
 	/* Evaluating the variable's value. This will lead to ValueVisitor evaluating the value. */
 	expr->value->Accept(this);
-	asmGen->AppendComment("Evaluated variable value, saving to eax");
-	asmGen->AppendLine("POP eax");
-
-	/* If we need to create the new variable */
-	if (toAdd)
-	{
-		/* Save the evaluated value's Type, as it is the new variable's Type*/
-		const Type *type = valueVisitor->GetType();
-
-		// Print type, delete after debugging
-		//std::cout << expr->var->id->literal << ' ' << type->size << '\n';
-
-		/* Add variable to variable table.
-		* We use TYPE_INT at this stage because we haven't implemented any other size handling (only 4bytes supported).
-		* Ideally & eventually, we will handle smaller/larger byte sizes properly, in order to save space.
-		*/
-		var = varTable->Add(expr->var->id, TypeTable::TYPE_INT);
-
-		/* Allocate stack memory for the new variable */
-		asmGen->AppendLine("SUB esp, " + std::to_string(var->type->size)); // Allocate memory for variable
-	}
-
-	asmGen->AppendLine("PUSH eax");
-	asmGen->AppendComment("Pushing eax after allocating storage");
+	asmGen->AppendComment("Evaluated variable value, pushed to stack");
 
 	/* Get in advance the pointer for the variable's value */
 	// we need to add 4 to this or it doesn't work?
@@ -160,6 +132,54 @@ void StatementVisitor::Visit(const AssignExpr *expr)
 		break;
 	}
 
+	asmGen->AppendSpace();
+}
+
+void StatementVisitor::Visit(const InitExpr *expr)
+{
+	/* Extract variable ID from AssignExpr */
+	Token *id = expr->id;
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// TODO: BUG HERE. WE MUST PUSH VALUE ONLY AFTER MOVING ESP.
+	// HOW CAN WE KNOW THE TYPE BEFORE EVALUATING IT?
+	// 1 OPTION IS TO USE TYPES, BUT THAT'S TOO MUCH WORK AND NOT THE POINT OF OUR LANG
+	// 2 OPTION IS TO POP EVALUATED INTO REGISTER, THEN MOV ESP, THEN PUSH AGAIN
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	/* Evaluating the variable's value. This will lead to ValueVisitor evaluating the value. */
+	expr->value->Accept(this);
+	asmGen->AppendComment("Evaluated variable value, saving to eax");
+	asmGen->AppendLine("POP eax");
+
+	/* Save the evaluated value's Type, as it is the new variable's Type*/
+	const Type *type = valueVisitor->GetType();
+
+	// Print type, delete after debugging
+	//std::cout << expr->var->id->literal << ' ' << type->size << '\n';
+
+	/* Add variable to variable table.
+	* We use TYPE_INT at this stage because we haven't implemented any other size handling (only 4bytes supported).
+	* Ideally & eventually, we will handle smaller/larger byte sizes properly, in order to save space.
+	*/
+	Var *var = varTable->Add(expr->id, TypeTable::TYPE_INT);
+
+	if (var == NULL)
+	{
+		ThrowCompileError(var->id->literal + " is already defined within this scope.");
+	}
+
+	/* Allocate stack memory for the new variable */
+	asmGen->AppendLine("SUB esp, " + std::to_string(var->type->size)); // Allocate memory for variable
+
+	asmGen->AppendLine("PUSH eax");
+	asmGen->AppendComment("Pushing eax after allocating storage");
+
+	/* Get in advance the pointer for the variable's value */
+	// we need to add 4 to this or it doesn't work?
+	std::string valPointer = "DWORD [ebp-" + std::to_string(var->memOffset) + "]";
+
+	asmGen->AppendLine("POP " + valPointer);
 	asmGen->AppendSpace();
 }
 

@@ -51,6 +51,7 @@ public:
 	void Visit(const ArrayExpr *expr) {}
 	void Visit(const PrintExpr *expr) {}
 	void Visit(const AssignExpr *expr) {}
+	void Visit(const InitExpr *expr) {}
 	void Visit(const IfExpr *expr) {}
 	void Visit(const ElseExpr *expr) {}
 	void Visit(const ControlFlowExpr *expr) {}

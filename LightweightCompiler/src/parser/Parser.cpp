@@ -67,6 +67,11 @@ bool Parser::Match(int typeCount, ...)
 	return false;
 }
 
+bool Parser::IsType()
+{
+	return Match(5, TokenType::TYPE_VOID, TokenType::TYPE_INT, TokenType::TYPE_FLOAT, TokenType::TYPE_BOOL, TokenType::TYPE_CHAR);
+}
+
 /**
 * Checks & returns whether the next Token's TokenType matches any of the given TokenTypes.
 * If there's a match, the Parser advances to the next Token.
@@ -498,9 +503,31 @@ Expr* Parser::LeftHand()
 	return ValueExpr();
 }
 
-Expr* Parser::Assign()
+Expr *Parser::Init()
 {
-	Expr* left = LeftHand();
+	if (!IsType())
+	{
+		return Assign();
+	}
+
+	Token *type = &Current();
+	Next();
+
+	Expect(1, TokenType::ID);
+	Token *id = &Current();
+	Next();
+
+	Expect(1, TokenType::EQ);
+	Next();
+
+	Expr *value = Init();
+
+	return new InitExpr(type, id, value);
+}
+
+Expr *Parser::Assign()
+{
+	Expr *left = LeftHand();
 
 	if (MatchNext(13, TokenType::EQ, TokenType::EQ_ADD, TokenType::EQ_SUB,
 		TokenType::EQ_MULT, TokenType::EQ_DIV, TokenType::EQ_MOD,
@@ -511,12 +538,12 @@ Expr* Parser::Assign()
 		Expect(1, TokenType::ID);
 		Next();
 
-		Token* assignOper = &Current();
+		Token *assignOper = &Current();
 
 		Next();
 
-		Expr* value = ValueExpr();
-		left = new AssignExpr((AccessibleExpr*)left, assignOper, value);
+		Expr *value = ValueExpr();
+		left = new AssignExpr((AccessibleExpr *) left, assignOper, value);
 	}
 
 	return left;
@@ -538,7 +565,7 @@ Expr* Parser::Print()
 		return new PrintExpr(value);
 	}
 
-	return Assign();
+	return Init();
 }
 
 IfExpr* Parser::If()
@@ -682,7 +709,7 @@ Expr* Parser::For()
 	}
 
 	Next();
-	Expr* assign = Assign();
+	Expr* assign = Init();
 	Next();
 	Expect(1, TokenType::COMMA);
 	Next();

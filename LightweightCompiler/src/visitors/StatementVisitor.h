@@ -45,6 +45,7 @@ public:
 	void Visit(const ArrayExpr *expr) override {} // Unimplemented
 	void Visit(const PrintExpr *expr) override;
 	void Visit(const AssignExpr *expr) override;
+	void Visit(const InitExpr *expr) override;
 	void Visit(const IfExpr *expr) override;
 	void Visit(const ElseExpr *expr) override;
 	void Visit(const ControlFlowExpr *expr) override;
