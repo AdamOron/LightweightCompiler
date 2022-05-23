@@ -493,41 +493,9 @@ Expr* Parser::Ternary()
 	return left;
 }
 
-Expr* Parser::ValueExpr()
-{
-	return Ternary();
-}
-
-Expr* Parser::LeftHand()
-{
-	return ValueExpr();
-}
-
-Expr *Parser::Init()
-{
-	if (!IsType())
-	{
-		return Assign();
-	}
-
-	Token *type = &Current();
-	Next();
-
-	Expect(1, TokenType::ID);
-	Token *id = &Current();
-	Next();
-
-	Expect(1, TokenType::EQ);
-	Next();
-
-	Expr *value = Init();
-
-	return new InitExpr(type, id, value);
-}
-
 Expr *Parser::Assign()
 {
-	Expr *left = LeftHand();
+	Expr *left = Ternary();
 
 	if (MatchNext(13, TokenType::EQ, TokenType::EQ_ADD, TokenType::EQ_SUB,
 		TokenType::EQ_MULT, TokenType::EQ_DIV, TokenType::EQ_MOD,
@@ -544,9 +512,35 @@ Expr *Parser::Assign()
 
 		Expr *value = ValueExpr();
 		left = new AssignExpr((AccessibleExpr *) left, assignOper, value);
+
+		std::cout << "ok";
 	}
 
 	return left;
+}
+
+Expr *Parser::Init()
+{
+	if (!IsType())
+	{
+		return Assign();
+	}
+
+	Token *type = &Current();
+	Next();
+
+	Expect(1, TokenType::ID);
+	Token *id = &Current();
+	
+	Expect(1, TokenType::EQ);
+	Prev();
+
+	InitExpr *init = new InitExpr(type, id);
+}
+
+Expr *Parser::ValueExpr()
+{
+	return Init();
 }
 
 Expr* Parser::Print()
@@ -572,7 +566,7 @@ IfExpr* Parser::If()
 {
 	Next();
 
-	CondExpr *cond = new CondExpr(LeftHand());
+	CondExpr *cond = new CondExpr(ValueExpr());
 
 	Next();
 	Expect(1, TokenType::ENDL);
@@ -690,7 +684,7 @@ Expr* Parser::While()
 
 	Next();
 
-	CondExpr* cond = new CondExpr(LeftHand());
+	CondExpr* cond = new CondExpr(ValueExpr());
 
 	Next();
 	Expect(1, TokenType::ENDL);
@@ -714,7 +708,7 @@ Expr* Parser::For()
 	Expect(1, TokenType::COMMA);
 	Next();
 
-	CondExpr* cond = new CondExpr(LeftHand());
+	CondExpr* cond = new CondExpr(ValueExpr());
 	Next();
 	Expect(1, TokenType::COMMA);
 	Next();

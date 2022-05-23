@@ -39,6 +39,9 @@ void CompileAndExecute(const std::string &sourceDir, const std::string &outputDi
     /* Second stage: Parse Tokens & Build AST */
     ExprGroup *block = ParseExprs(tokens);
 
+    block->Repr(std::cout);
+    return;
+
     /* Third stage: Compile AST into ASM code */
     std::string compiled = Compile(block);
 

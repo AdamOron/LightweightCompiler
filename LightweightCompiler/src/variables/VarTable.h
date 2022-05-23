@@ -10,6 +10,11 @@ struct Type
 		size(typeSize)
 	{
 	}
+
+	bool Matches(const Type &other) const
+	{
+		return size == other.size;
+	}
 };
 
 using VarId = std::string;

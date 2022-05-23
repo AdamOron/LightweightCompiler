@@ -153,7 +153,7 @@ void StatementVisitor::Visit(const InitExpr *expr)
 	asmGen->AppendLine("POP eax");
 
 	/* Save the evaluated value's Type, as it is the new variable's Type*/
-	const Type *type = valueVisitor->GetType();
+	const Type *evalType = valueVisitor->GetType();
 
 	// Print type, delete after debugging
 	//std::cout << expr->var->id->literal << ' ' << type->size << '\n';
@@ -166,7 +166,13 @@ void StatementVisitor::Visit(const InitExpr *expr)
 
 	if (var == NULL)
 	{
-		ThrowCompileError(var->id->literal + " is already defined within this scope.");
+		ThrowCompileError(id->literal + " is already defined within this scope.");
+	}
+
+	const Type *varType = var->type;
+	if (!varType->Matches(*evalType))
+	{
+		ThrowCompileError("var type mismatch");
 	}
 
 	/* Allocate stack memory for the new variable */

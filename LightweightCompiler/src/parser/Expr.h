@@ -289,17 +289,14 @@ public:
 	void Accept(IVisitor *visitor) const override;
 };
 
-class InitExpr : public Expr
+class InitExpr : public AccessibleExpr
 {
 public:
 	Token *type;
-	Token *id;
-	Expr *value;
 
-	InitExpr(Token *type, Token *id, Expr *value) :
+	InitExpr(Token *type, Token *id) :
 		type(type),
-		id(id),
-		value(value)
+		AccessibleExpr(id)
 	{
 	}
 
@@ -309,8 +306,6 @@ public:
 		stream << *type;
 		stream << " ";
 		stream << *id;
-		stream << " = ";
-		value->Repr(stream);
 		stream << ')';
 		return stream;
 	}

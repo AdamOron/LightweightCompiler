@@ -112,7 +112,6 @@ public:
 	Expr *Or();
 	Expr *Ternary();
 	Expr *ValueExpr();
-	Expr *LeftHand();
 	Expr *Assign();
 	Expr *Init();
 	Expr *Print();
