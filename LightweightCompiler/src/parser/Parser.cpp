@@ -1,5 +1,5 @@
 #include "Parser.h"
-#include "../variables/VarTable.h"
+#include "../tables/VarTable.h"
 #include <stdarg.h>
 
 /**
@@ -507,13 +507,10 @@ Expr *Parser::Assign()
 		Next();
 
 		Token *assignOper = &Current();
-
 		Next();
 
 		Expr *value = ValueExpr();
 		left = new AssignExpr((AccessibleExpr *) left, assignOper, value);
-
-		std::cout << "ok";
 	}
 
 	return left;
@@ -532,10 +529,16 @@ Expr *Parser::Init()
 	Expect(1, TokenType::ID);
 	Token *id = &Current();
 	
-	Expect(1, TokenType::EQ);
-	Prev();
+	if (!MatchNext(1, TokenType::EQ))
+	{
+		Next();
+		Expect(1, TokenType::ENDL);
+		Prev();
+		return new InitExpr(type, id);
+	}
 
-	InitExpr *init = new InitExpr(type, id);
+	Prev();
+	return new InitExpr(type, id, (AssignExpr *) Assign());
 }
 
 Expr *Parser::ValueExpr()
@@ -726,9 +729,9 @@ Expr* Parser::For()
 // Not being used currently
 Expr *Parser::Func()
 {
-	if (!Match(5, TokenType::TYPE_VOID, TokenType::TYPE_INT, TokenType::TYPE_FLOAT, TokenType::TYPE_BOOL, TokenType::TYPE_CHAR))
+	if (!IsType())
 	{
-		return While();
+		return For();
 	}
 
 	Token *type = &Current();
@@ -737,6 +740,12 @@ Expr *Parser::Func()
 	Expect(1, TokenType::ID);
 	Token *id = &Current();
 	Next();
+
+	if (!Match(1, TokenType::LP))
+	{
+		Prev(); Prev(); // Go back to type
+		return Init();
+	}
 
 	Expect(1, TokenType::LP);
 	Next();
@@ -753,7 +762,7 @@ Expr *Parser::Func()
 
 Expr* Parser::Statement()
 {
-	return For();
+	return Func();
 }
 
 ExprGroup* Parser::DeepCodeBlock()

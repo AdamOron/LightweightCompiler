@@ -54,7 +54,6 @@ class VarTable
 {
 private:
 	static size_t totalBytes;
-	TypeTable types;
 	std::unordered_map<VarId, Var *> varMap;
 
 public:

@@ -11,11 +11,11 @@ std::string Compile(const ExprGroup *block)
 	StatementVisitor visitor;
 
 	visitor.asmGen->FilePrologue();
-	visitor.asmGen->EnterMethod();
+	//visitor.asmGen->EnterMethod();
 
 	visitor.Visit(block);
 
-	visitor.asmGen->ExitMethod();
+	//visitor.asmGen->ExitMethod();
 	visitor.asmGen->FileEpilogue();
 
 	return visitor.asmGen->code;

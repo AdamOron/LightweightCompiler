@@ -10,20 +10,20 @@ TypeTable::TypeTable() :
 {
 }
 
-const Type *TypeTable::GetType(const Token *value)
+const Type *TypeTable::GetType(const Token *type)
 {
-	switch (value->type)
+	switch (type->type)
 	{
-	case TokenType::INT:
+	case TokenType::TYPE_INT:
 		return TYPE_INT;
 
-	case TokenType::FLOAT:
+	case TokenType::TYPE_FLOAT:
 		return TYPE_FLOAT;
 
-	case TokenType::BOOL:
+	case TokenType::TYPE_BOOL:
 		return TYPE_BOOL;
 
-	case TokenType::CHAR:
+	case TokenType::TYPE_CHAR:
 		return TYPE_CHAR;
 	}
 
@@ -34,7 +34,6 @@ size_t VarTable::totalBytes = 0;
 
 VarTable::VarTable()
 {
-	this->types = TypeTable();
 	this->varMap = std::unordered_map<std::string, Var*>();
 }
 

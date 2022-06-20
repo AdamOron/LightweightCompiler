@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\tables\FuncTable.cpp" />
     <ClCompile Include="src\asm\ASMGenerator.cpp" />
     <ClCompile Include="src\asm\ASMRunner.cpp" />
     <ClCompile Include="src\visitors\StatementVisitor.cpp" />
@@ -149,9 +150,10 @@
     <ClCompile Include="src\tokens\Tokenizer.cpp" />
     <ClCompile Include="src\LightweightCompiler.cpp" />
     <ClCompile Include="src\parser\Parser.cpp" />
-    <ClCompile Include="src\variables\VarTable.cpp" />
+    <ClCompile Include="src\tables\VarTable.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\tables\FuncTable.h" />
     <ClInclude Include="src\asm\ASMGenerator.h" />
     <ClInclude Include="src\asm\ASMRunner.h" />
     <ClInclude Include="src\visitors\StatementVisitor.h" />
@@ -163,7 +165,7 @@
     <ClInclude Include="src\tokens\Tokenizer.h" />
     <ClInclude Include="src\parser\Parser.h" />
     <ClInclude Include="src\tokens\Token.h" />
-    <ClInclude Include="src\variables\VarTable.h" />
+    <ClInclude Include="src\tables\VarTable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

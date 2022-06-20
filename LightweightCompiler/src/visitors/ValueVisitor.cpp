@@ -40,7 +40,24 @@ void ValueVisitor::Visit(const AccessibleExpr *expr)
 		ThrowCompileError("Invalid accessor name " + id->literal);
 	}
 
-	superVisitor->asmGen->PushValue("DWORD [ebp-" + std::to_string(var->memOffset) + "]");
+	//don't use this, there are multiple types
+	//superVisitor->asmGen->PushValue("DWORD [ebp-" + std::to_string(var->memOffset) + "]");
+
+	switch (var->type->size)
+	{
+	case 4:
+		superVisitor->asmGen->AppendLine("PUSH DWORD [ebp-" + std::to_string(var->memOffset) + "]");
+		break;
+
+	case 2:
+		superVisitor->asmGen->AppendLine("PUSH WORD [ebp-" + std::to_string(var->memOffset) + "]");
+		break;
+
+	case 1:
+		superVisitor->asmGen->AppendLine("MOVZX eax, BYTE [ebp-" + std::to_string(var->memOffset) + "]");
+		superVisitor->asmGen->AppendLine("PUSH eax");
+		break;
+	}
 
 	returnType = var->type;
 }

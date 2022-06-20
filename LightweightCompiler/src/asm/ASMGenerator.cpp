@@ -176,26 +176,6 @@ void ASMGenerator::ExitMethod()
 	AppendLine("RET");
 }
 
-void ASMGenerator::DefineLib()
-{
-	AppendComment("Library Start");
-	AppendSpace();
-
-	AppendLine("decimal_format: db \"%d\", 10, 0");
-	AppendLine("extern _printf");
-	AppendSpace();
-	AppendLine("print_number:");
-	AppendLine("MOV eax, [esp+4]");
-	AppendLine("PUSH eax");
-	AppendLine("PUSH decimal_format");
-	AppendLine("CALL _printf");
-	AppendLine("ADD esp, 8");
-	AppendLine("RET");
-	AppendSpace();
-
-	AppendComment("Library End");
-}
-
 void ASMGenerator::FilePrologue()
 {
 	/*AppendLine("include \\masm32\\include\\masm32rt.inc");
@@ -204,9 +184,9 @@ void ASMGenerator::FilePrologue()
 	AppendLine("start:");
 	AppendSpace();*/
 
-	AppendLine("section .text");
+	AppendLine("%include \"E:\\Workspace\\VisualStudio\\C++\\LightweightCompilerRefactor\\TestProject\\out\\lib.asm\"");
 	AppendSpace();
-	DefineLib();
+	AppendLine("section .text");
 	AppendSpace();
 	AppendLine("global _main");
 	AppendSpace();

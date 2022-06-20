@@ -3,7 +3,7 @@
 #include <stack>
 #include <vector>
 #include "../parser/Expr.h"
-#include "../variables/VarTable.h"
+#include "../tables/VarTable.h"
 #include "../asm/ASMGenerator.h"
 #include "../visitors/StatementVisitor.h"
 #include "../visitors/ValueVisitor.h"

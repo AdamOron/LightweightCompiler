@@ -75,7 +75,15 @@ void StatementVisitor::Visit(const AccessibleExpr *expr)
 void StatementVisitor::Visit(const PrintExpr *expr)
 {
 	/* Evaluate & save print value */
-	expr->value->Accept(this);
+	expr->value->Accept(valueVisitor);
+
+	const Type *type = valueVisitor->GetType();
+
+	if (type == TypeTable::TYPE_BOOL)
+	{
+		asmGen->AppendLine("CALL print_bool");
+		return;
+	}
 
 	/* Value is stored in stack, just call print function */
 	asmGen->AppendLine("CALL print_number");
@@ -140,52 +148,78 @@ void StatementVisitor::Visit(const InitExpr *expr)
 	/* Extract variable ID from AssignExpr */
 	Token *id = expr->id;
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO: BUG HERE. WE MUST PUSH VALUE ONLY AFTER MOVING ESP.
-	// HOW CAN WE KNOW THE TYPE BEFORE EVALUATING IT?
-	// 1 OPTION IS TO USE TYPES, BUT THAT'S TOO MUCH WORK AND NOT THE POINT OF OUR LANG
-	// 2 OPTION IS TO POP EVALUATED INTO REGISTER, THEN MOV ESP, THEN PUSH AGAIN
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	const Type *type = typeTable->GetType(expr->type);
 
-	/* Evaluating the variable's value. This will lead to ValueVisitor evaluating the value. */
-	expr->value->Accept(this);
-	asmGen->AppendComment("Evaluated variable value, saving to eax");
-	asmGen->AppendLine("POP eax");
+	if (expr->assign != NULL)
+	{
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// TODO: BUG HERE. WE MUST PUSH VALUE ONLY AFTER MOVING ESP.
+		// HOW CAN WE KNOW THE TYPE BEFORE EVALUATING IT?
+		// 1 OPTION IS TO USE TYPES, BUT THAT'S TOO MUCH WORK AND NOT THE POINT OF OUR LANG
+		// 2 OPTION IS TO POP EVALUATED INTO REGISTER, THEN MOV ESP, THEN PUSH AGAIN
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	/* Save the evaluated value's Type, as it is the new variable's Type*/
-	const Type *evalType = valueVisitor->GetType();
+		/* Evaluating the variable's value. This will lead to ValueVisitor evaluating the value. */
+		expr->assign->value->Accept(this);
+		asmGen->AppendComment("Evaluated variable value, saving to eax");
+		asmGen->AppendLine("POP eax");
 
-	// Print type, delete after debugging
-	//std::cout << expr->var->id->literal << ' ' << type->size << '\n';
+		/* Save the evaluated value's Type, as it is the new variable's Type*/
+		const Type *evalType = valueVisitor->GetType();
+
+		// Print type, delete after debugging
+		//std::cout << expr->var->id->literal << ' ' << type->size << '\n';
+
+		if (!type->Matches(*evalType))
+		{
+			ThrowCompileError("var type mismatch");
+		}
+	}
 
 	/* Add variable to variable table.
 	* We use TYPE_INT at this stage because we haven't implemented any other size handling (only 4bytes supported).
 	* Ideally & eventually, we will handle smaller/larger byte sizes properly, in order to save space.
 	*/
-	Var *var = varTable->Add(expr->id, TypeTable::TYPE_INT);
+	Var *var = varTable->Add(expr->id, type);
 
 	if (var == NULL)
 	{
 		ThrowCompileError(id->literal + " is already defined within this scope.");
 	}
 
-	const Type *varType = var->type;
-	if (!varType->Matches(*evalType))
-	{
-		ThrowCompileError("var type mismatch");
-	}
-
 	/* Allocate stack memory for the new variable */
 	asmGen->AppendLine("SUB esp, " + std::to_string(var->type->size)); // Allocate memory for variable
 
-	asmGen->AppendLine("PUSH eax");
-	asmGen->AppendComment("Pushing eax after allocating storage");
+	if (expr->assign != NULL)
+	{
+		std::string ptrType;
+		std::string regSegment;
 
-	/* Get in advance the pointer for the variable's value */
-	// we need to add 4 to this or it doesn't work?
-	std::string valPointer = "DWORD [ebp-" + std::to_string(var->memOffset) + "]";
+		switch (var->type->size)
+		{
+		case 4:
+			ptrType = "DWORD";
+			regSegment = "eax";
+			break;
 
-	asmGen->AppendLine("POP " + valPointer);
+		case 2:
+			ptrType = "WORD";
+			regSegment = "ax";
+			break;
+
+		case 1:
+			ptrType = "BYTE";
+			regSegment = "al";
+			break;
+		}
+
+		/* Get in advance the pointer for the variable's value */
+		// we need to add 4 to this or it doesn't work? (half a year after starting this project, I still don't understand why I left this comment)
+		std::string valPointer = "[ebp-" + std::to_string(var->memOffset) + "]";
+
+		asmGen->AppendLine("MOV " + ptrType + ' ' + valPointer + ", " + regSegment);
+	}
+
 	asmGen->AppendSpace();
 }
 
@@ -276,6 +310,11 @@ void StatementVisitor::Visit(const ForExpr *expr)
 
 void StatementVisitor::Visit(const FuncExpr *expr)
 {
+	asmGen->EnterMethod();
+
+	expr->body->Accept(this);
+
+	asmGen->ExitMethod();
 }
 
 void StatementVisitor::Visit(const ExprGroup *block)

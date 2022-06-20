@@ -8,6 +8,7 @@ class StatementVisitor : public ChildVisitor<StatementVisitor>
 protected:
 	/* Each StatementVisitor has a varTable that keeps track of all of its variables */
 	VarTable *varTable;
+	TypeTable *typeTable;
 	/**
 	* Each StatementVisitor has a ValueVisitor that's used for evaluating values & getting their Type.
 	*/

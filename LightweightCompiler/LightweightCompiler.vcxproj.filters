@@ -24,7 +24,7 @@
     <ClCompile Include="src\parser\Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\variables\VarTable.cpp">
+    <ClCompile Include="src\tables\VarTable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\parser\Expr.cpp">
@@ -48,6 +48,9 @@
     <ClCompile Include="src\compiler\Compiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\tables\FuncTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\tokens\Tokenizer.h">
@@ -59,7 +62,7 @@
     <ClInclude Include="src\compiler\Compiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\variables\VarTable.h">
+    <ClInclude Include="src\tables\VarTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\parser\Expr.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\tokens\Token.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tables\FuncTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

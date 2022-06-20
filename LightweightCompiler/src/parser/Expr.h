@@ -1,7 +1,7 @@
 #pragma once
 #include "../tokens/Token.h"
 #include "../visitors/IVisitor.h"
-#include "../variables/VarTable.h"
+#include "../tables/VarTable.h"
 #include <algorithm>
 
 /**
@@ -289,30 +289,6 @@ public:
 	void Accept(IVisitor *visitor) const override;
 };
 
-class InitExpr : public AccessibleExpr
-{
-public:
-	Token *type;
-
-	InitExpr(Token *type, Token *id) :
-		type(type),
-		AccessibleExpr(id)
-	{
-	}
-
-	std::ostream &Repr(std::ostream &stream) const override
-	{
-		stream << '(';
-		stream << *type;
-		stream << " ";
-		stream << *id;
-		stream << ')';
-		return stream;
-	}
-
-	void Accept(IVisitor *visitor) const override;
-};
-
 /**
 * Implementation for an assign expression.
 */
@@ -336,6 +312,42 @@ public:
 		var->Repr(stream);
 		stream << ' ' << *assignOper << ' ';
 		value->Repr(stream);
+		stream << ')';
+		return stream;
+	}
+
+	void Accept(IVisitor *visitor) const override;
+};
+
+class InitExpr : public AccessibleExpr
+{
+public:
+	Token *type;
+	AssignExpr *assign;
+
+	InitExpr(Token *type, Token *id, AssignExpr *assign) :
+		type(type),
+		AccessibleExpr(id),
+		assign(assign)
+	{
+	}
+
+	InitExpr(Token *type, Token *id) :
+		InitExpr(type, id, NULL)
+	{
+	}
+
+	std::ostream &Repr(std::ostream &stream) const override
+	{
+		stream << '(';
+		stream << *type;
+		stream << ' ';
+
+		if (assign)
+			assign->Repr(stream);
+		else
+			stream << *id;
+
 		stream << ')';
 		return stream;
 	}
