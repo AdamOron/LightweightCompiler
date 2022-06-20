@@ -5,7 +5,7 @@ There are also some problems with dynamic allocation (unnecessary heap allocatio
 **Please do keep in mind that I started this project a long time ago in an attempt to learn C++, and be merciful when reviewing it :)**
 
 # Instructions
-You will need NASM installed on your machine & added to your system's PATH (ended up switching to NASM, MASM was a tad problematic).  
+You will need NASM installed on your machine & added to your system's PATH.  
 
 Source code must be written to a TXT file.  
 
