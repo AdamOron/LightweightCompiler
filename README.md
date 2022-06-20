@@ -4,7 +4,7 @@ The compiler is in a fairly rough state at the moment - some classes are redunda
 There are also some problems with dynamic allocation (unnecessary heap allocations, no deallocations).  
 **Please do keep in mind that I started this project a long time ago in an attempt to learn C++, and be merciful when reviewing it :)**
 
-# Instructions
+## Usage
 You will need NASM installed on your machine & added to your system's PATH.  
 
 Source code must be written to a TXT file.  
@@ -17,16 +17,16 @@ After cloning the project, head into src/LightweightCompiler.cpp and update `sou
 For example, if your source file is saved at `"E:\Projects\hello.txt"`, and you want the compiled files to be saved to `"E:\Projects\out\"`:
 `sourceDir = "E:\Projects\"`, `outputDir = "E:\Projects\out\"`, `projectName = "hello"`
 
-# Syntax #
+## Syntax ##
 The language is indent-sensitive, meaning that it does not use curly brackets to understand scopes, but rather indentations. Any empty line will need to follow the proper amount of indentations for its scope.   
-**Bad** example:
+### Bad example
 ```
 if var == 5
 <- indents end here
   print(17)
 ```
 This will result in compilation error.  
-**Good** example:
+### Good example
 ```
 if var == 5
   <- indents end here
